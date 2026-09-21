@@ -1,0 +1,336 @@
+<title>Double k-means — Spambase</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --bg:#faf8f4;
+    --surface:#ffffff;
+    --surface-2:#f1efe8;
+    --text:#22201b;
+    --muted:#6b6558;
+    --line:#e3ddd0;
+    --accent:#2f6f68;
+    --accent-soft:#e4efec;
+    --accent-strong:#1f4f4a;
+    --bad:#a4453a;
+    --shadow: 0 1px 2px rgba(30,25,15,.04), 0 8px 24px -12px rgba(30,25,15,.12);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#17181a;
+      --surface:#1e2022;
+      --surface-2:#26282a;
+      --text:#eae7df;
+      --muted:#9c968a;
+      --line:#34363a;
+      --accent:#6fc4ba;
+      --accent-soft:#213431;
+      --accent-strong:#8fd9cf;
+      --bad:#e0796d;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#17181a;
+    --surface:#1e2022;
+    --surface-2:#26282a;
+    --text:#eae7df;
+    --muted:#9c968a;
+    --line:#34363a;
+    --accent:#6fc4ba;
+    --accent-soft:#213431;
+    --accent-strong:#8fd9cf;
+    --bad:#e0796d;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    padding-inline:20px;
+  }
+  .page{
+    max-width:760px;
+    margin-inline:auto;
+    padding-block:56px 80px;
+    display:flex;
+    flex-direction:column;
+    gap:44px;
+  }
+  h1,h2,h3{
+    font-family:"Source Serif 4", Georgia, serif;
+    text-wrap:balance;
+    color:var(--text);
+    margin:0;
+  }
+  h1{font-size:2.15rem; font-weight:700; letter-spacing:-.01em;}
+  h2{font-size:1.35rem; font-weight:600; margin-bottom:4px;}
+  h3{font-size:1.05rem; font-weight:600; color:var(--accent-strong);}
+  p{margin:0;}
+  .lede{color:var(--muted); font-size:1.05rem; max-width:62ch;}
+  .eyebrow{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    font-size:.72rem;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--accent);
+  }
+  header.hero{display:flex; flex-direction:column; gap:14px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap:10px;
+    margin-top:6px;
+  }
+  .pill{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:.78rem;
+    color:var(--muted);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  section{display:flex; flex-direction:column; gap:16px;}
+  section > .lede{margin-top:-8px;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-variant-numeric:tabular-nums;
+    font-size:.92rem;
+  }
+  caption{
+    caption-side:bottom;
+    text-align:left;
+    color:var(--muted);
+    font-size:.82rem;
+    padding-top:10px;
+  }
+  thead th{
+    text-align:right;
+    font-family:"IBM Plex Mono", monospace;
+    font-weight:500;
+    font-size:.72rem;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    color:var(--muted);
+    border-bottom:1px solid var(--line);
+    padding:8px 10px;
+  }
+  thead th:first-child, thead th:nth-child(2){text-align:left;}
+  tbody td{
+    padding:8px 10px;
+    text-align:right;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td:first-child, tbody td:nth-child(2){text-align:left; color:var(--text);}
+  tbody tr.best td{
+    background:var(--accent-soft);
+    font-weight:600;
+    color:var(--accent-strong);
+  }
+  tbody tr.best td:first-child{
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .table-wrap{overflow-x:auto; border-radius:10px;}
+
+  figure{
+    margin:0;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:18px 18px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  figure img{
+    width:100%;
+    max-width:100%;
+    display:block;
+    border-radius:6px;
+    background:#ffffff;
+  }
+  figcaption{
+    font-size:.85rem;
+    color:var(--muted);
+  }
+  figcaption b{color:var(--text); font-weight:600;}
+
+  .kpi-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:12px;
+  }
+  .kpi{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .kpi .label{font-family:"IBM Plex Mono",monospace; font-size:.7rem; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);}
+  .kpi .value{font-family:"Source Serif 4",serif; font-size:1.6rem; font-weight:700;}
+  .kpi .sub{font-size:.8rem; color:var(--muted);}
+
+  .callout{
+    border-left:3px solid var(--accent);
+    background:var(--surface-2);
+    border-radius:0 10px 10px 0;
+    padding:14px 18px;
+    font-size:.95rem;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .callout.warn{border-left-color:var(--bad);}
+  .callout p + p{margin-top:0;}
+
+  .two-col{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  @media (max-width:620px){
+    .two-col{grid-template-columns:1fr;}
+    h1{font-size:1.7rem;}
+  }
+
+  code, .mono{font-family:"IBM Plex Mono", monospace; font-size:.85em;}
+  footer{
+    border-top:1px solid var(--line);
+    padding-top:18px;
+    color:var(--muted);
+    font-size:.82rem;
+    display:flex; flex-direction:column; gap:6px;
+  }
+</style>
+
+<div class="page">
+
+  <header class="hero">
+    <span class="eyebrow">Aprendizagem de Máquina · Clustering simultâneo</span>
+    <h1>Double k-means na base Spambase</h1>
+    <p class="lede">
+      Classificação simultânea de objetos (e-mails) e variáveis (atributos léxicos) via
+      <b>double k-means</b> (Vichi, 2001), implementado do zero em R (validado contra o pacote <span class="mono">drclust</span>).
+      Busca em grade sobre K ∈ {2,3,4} blocos de e-mails e
+      H ∈ {1,…,K} blocos de variáveis, 100 reinícios aleatórios por par.
+    </p>
+    <div class="meta-row">
+      <span class="pill">n = 4601 e-mails</span>
+      <span class="pill">J = 57 variáveis</span>
+      <span class="pill">1813 spam · 2788 não-spam</span>
+      <span class="pill">z-score, 9 pares (K,H) × 100 reinícios</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>1. Grade (K, H): melhor resultado de 100 execuções por par</h2>
+    <p class="lede">
+      Para cada par o algoritmo é executado com 100 inicializações aleatórias e fica a de maior função
+      objetivo f&nbsp;=&nbsp;tr(B'B) (variância explicada pelos blocos). A silhueta média (Sil) foi calculada sobre
+      a partição de objetos resultante, na mesma matriz padronizada usada no algoritmo.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>K</th><th>H</th><th>f = tr(B'B)</th><th>% var. explicada</th><th>Execuções no melhor f</th><th>f (drclust)</th><th>Sil média</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>2</td><td>1</td><td>5 742,00</td><td>2,19%</td><td>100/100</td><td>5 742,00</td><td>0,2961</td></tr>
+          <tr class="best"><td>2</td><td>2</td><td>17 766,44</td><td>6,78%</td><td>5/100</td><td>17 766,44</td><td>0,6596</td></tr>
+          <tr><td>3</td><td>1</td><td>7 841,28</td><td>2,99%</td><td>100/100</td><td>7 841,28</td><td>0,2515</td></tr>
+          <tr><td>3</td><td>2</td><td>22 878,37</td><td>8,73%</td><td>5/100</td><td>22 830,25</td><td>0,2454</td></tr>
+          <tr><td>3</td><td>3</td><td>27 817,17</td><td>10,61%</td><td>8/100</td><td>27 817,15</td><td>0,1419</td></tr>
+          <tr><td>4</td><td>1</td><td>8 976,37</td><td>3,42%</td><td>100/100</td><td>8 976,37</td><td>0,0484</td></tr>
+          <tr><td>4</td><td>2</td><td>28 899,42</td><td>11,02%</td><td>1/100</td><td>28 892,02</td><td>0,2444</td></tr>
+          <tr><td>4</td><td>3</td><td>33 733,22</td><td>12,87%</td><td>22/100</td><td>33 733,22</td><td>0,1620</td></tr>
+          <tr><td>4</td><td>4</td><td>35 069,25</td><td>13,38%</td><td>1/100</td><td>35 163,28</td><td>0,1642</td></tr>
+        </tbody>
+        <caption>Linha destacada: par (K,H) de máxima silhueta média entre os 9 candidatos. Em (3,2), (4,2) e (4,4) o melhor f é raro (1 a 5 das 100 execuções) e nossa implementação e o pacote param em ótimos locais ligeiramente distintos (diferença &lt; 0,3%); isso não afeta a escolha de (K*,H*).</caption>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Silhueta × (K,H) e escolha de K*</h2>
+    <figure>
+      <img src="sil_vs_KH.png" alt="Gráfico de barras da silhueta média para cada par (K,H) testado">
+      <figcaption>Silhueta média por par (K,H). O par <b>(2,2)</b> se destaca isoladamente com Sil = 0,6596 — nenhum outro par ultrapassa 0,30.</figcaption>
+    </figure>
+    <div class="kpi-row">
+      <div class="kpi"><span class="label">K* escolhido</span><span class="value">2</span><span class="sub">objetos (e-mails)</span></div>
+      <div class="kpi"><span class="label">H*</span><span class="value">2</span><span class="sub">blocos de variáveis</span></div>
+      <div class="kpi"><span class="label">Sil(K*,H*)</span><span class="value">0,660</span><span class="sub">argmax sobre os 9 pares</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3. Índice de Rand corrigido (ARI)</h2>
+    <p class="lede">
+      Comparando a partição de objetos obtida (K*=2) com o rótulo <i>a priori</i> spam/não-spam:
+    </p>
+    <div class="kpi-row" style="grid-template-columns:repeat(auto-fit,minmax(190px,1fr));">
+      <div class="kpi"><span class="label">ARI</span><span class="value" style="color:var(--bad)">−0,0049</span><span class="sub">idêntico ao drclust::mrand</span></div>
+    </div>
+    <div class="callout warn">
+      <p><b>Comentário.</b> O ARI é praticamente nulo (levemente negativo), ou seja, a concordância entre a
+      partição do double k-means e o rótulo de spam não é melhor do que o esperado ao acaso.</p>
+      <p>A causa fica evidente na matriz de confusão abaixo: o cluster de tamanho 2 encontrado
+      não separa spam de não-spam — ele isola 34 e-mails com valores extremos (outliers) em um
+      dos blocos de variáveis, enquanto o outro cluster (4567 e-mails) mantém praticamente a
+      mesma proporção de spam do conjunto inteiro (1813/4567 ≈ 39,7%, contra 1813/4601 ≈ 39,4%
+      no total). A silhueta favorece essa solução porque o cluster minoritário é geometricamente
+      muito bem separado — não porque ela captura o fenômeno "spam".
+      Isso ilustra um risco conhecido de escolher K por índices internos (como a silhueta) sobre
+      dados brutos padronizados e assimétricos (frequências de palavras/caracteres,
+      <span class="mono">capital_run_length_*</span>): o ótimo geométrico pode não coincidir com
+      o rótulo semântico de interesse.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. Melhor modelo double k-means (K*=2, H*=2)</h2>
+
+    <h3>i) Matriz de protótipos dos blocos — G</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th></th><th>Var-clust 1</th><th>Var-clust 2</th></tr></thead>
+        <tbody>
+          <tr><td>Obj-clust 1</td><td class="mono" style="color:var(--muted)">(n=34)</td><td><b>6,860</b></td><td>−0,144</td></tr>
+          <tr><td>Obj-clust 2</td><td class="mono" style="color:var(--muted)">(n=4567)</td><td>−0,051</td><td>0,001</td></tr>
+        </tbody>
+        <caption>Valores em desvios-padrão (dados z-score). Obj-clust 1 tem média +6,86σ no Var-clust 1 (11 variáveis, entre elas <span class="mono">word_freq_hp</span>, <span class="mono">_hpl</span>, <span class="mono">_650</span>, <span class="mono">_lab</span>, <span class="mono">_telnet</span>) — perfil de outlier extremo, não um padrão típico de spam.</caption>
+      </table>
+    </div>
+
+    <h3>ii) Matriz de confusão — partição do algoritmo × rótulo a priori</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Não-spam (0)</th><th>Spam (1)</th></tr></thead>
+        <tbody>
+          <tr><td>Cluster 1 (n=34)</td><td>34</td><td>0</td></tr>
+          <tr><td>Cluster 2 (n=4567)</td><td>2754</td><td>1813</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>iv) Função objetivo × iterações</h3>
+    <figure>
+      <img src="objfun_vs_iter.png" alt="Curva da função objetivo tr(B'B) crescendo monotonicamente ao longo das iterações até convergir">
+      <figcaption>Trajetória de f&nbsp;=&nbsp;tr(B'B) da melhor das 100 execuções (K=2, H=2) — a mesma que gerou G e a matriz de confusão; iteração 0 = inicialização aleatória, 29 iterações até convergência (tol=1e-6). O crescimento é monótono, como esperado do esquema de mínimos alternados de Vichi (2001).</figcaption>
+    </figure>
+  </section>
+
+  <footer>
+    <p><b>Nota metodológica.</b> O double k-means foi implementado do zero (mínimos quadrados alternados de
+    Vichi, 2001) porque o <span class="mono">drclust::doublekm()</span> não expõe o histórico por iteração.
+    Assim, G, matriz de confusão, silhueta, ARI e a curva de convergência vêm de uma única execução.
+    Validação cruzada: no par escolhido (2,2) o pacote atinge exatamente o mesmo f (17 766,44) e o mesmo ARI.</p>
+    <p>R 4.6.1 · pacote <span class="mono">drclust</span> 0.1.1 (Prunila &amp; Vichi) · <span class="mono">cluster</span> 2.1.8.3 · <span class="mono">ggplot2</span> 4.0.3 · dataset: UCI Spambase.</p>
+  </footer>
+
+</div>
