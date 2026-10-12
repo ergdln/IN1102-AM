@@ -1,0 +1,5 @@
+Classificador,Metrica,Estimativa_pontual,IC95_inferior,IC95_superior
+Parzen,Taxa de erro,0.079,0.0776,0.0804
+Parzen,Precisao,0.9126,0.9106,0.9147
+Parzen,Cobertura,0.8845,0.8816,0.8874
+Parzen,F1,0.8981,0.8962,0.8999
