@@ -76,14 +76,17 @@ class BayesGaussiano(_Base):
     Covariância de máxima verossimilhança (divide por n_i, bias=True).
     Na Spambase a covariância de cada classe é quase singular (número de
     condição ~1e11) e, na versão 2, a classe de 34 e-mails tem menos
-    exemplos que atributos, então a covariância é singular. Para poder
-    invertê-la somamos REG à diagonal, sobre os dados padronizados (onde
-    toda variável tem variância 1, logo REG é desprezível frente a
-    qualquer uma delas). A padronização não altera o classificador: o
-    gaussiano com covariância cheia é invariante a mudanças de escala.
+    exemplos que atributos, então a covariância é singular e não pode ser
+    invertida. Somamos reg * I à covariância dos dados padronizados (toda
+    variável com variância 1, então reg é a fração de variância somada a
+    cada uma). O valor de reg muda o resultado, por isso é escolhido por
+    validação cruzada; reg = 1e-6 é praticamente a MV pura.
     """
 
-    REG = 1e-6
+    GRADE = {"reg": [1.0, 0.3, 0.1, 0.03, 0.01, 1e-3, 1e-4, 1e-5, 1e-6]}   # do mais regularizado ao menos
+
+    def __init__(self, reg=1e-6):
+        self.reg = reg
 
     def fit(self, X, y):
         self._priors(y)
@@ -94,7 +97,7 @@ class BayesGaussiano(_Base):
         self.medias_, self.fatores_, self.log_dets_ = [], [], []
         for c in self.classes_:
             Zc = Z[y == c]
-            cov = np.cov(Zc, rowvar=False, bias=True) + self.REG * np.eye(d)
+            cov = np.cov(Zc, rowvar=False, bias=True) + self.reg * np.eye(d)
             fator = cho_factor(cov, lower=True)
             self.medias_.append(Zc.mean(axis=0))
             self.fatores_.append(fator)
