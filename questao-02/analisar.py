@@ -210,7 +210,7 @@ def main():
         print(f"[{versao}] tabelas e gráfico gerados")
 
     (PASTA / "resultados.md").write_text("\n".join(md), encoding="utf-8")
-    print(f"Resumo em {PASTA / 'resultados.md'}")
+    print("Resumo em output/resultados.md")
 
 
 if __name__ == "__main__":

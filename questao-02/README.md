@@ -37,6 +37,7 @@ F-measure média (300 avaliações, IC 95% em `output/resultados.md`):
 
 | Arquivo | Conteúdo |
 |---|---|
+| `questao2.ipynb` | Notebook que roda os itens (a)–(d) e mostra tabelas e gráficos |
 | `comum.py` | Dados, as duas versões da resposta, splits, métricas e intervalo de confiança |
 | `classificadores.py` | Os 5 classificadores e a seleção de hiper-parâmetros |
 | `executar_cv.py` | Item (a): validação cruzada aninhada 30 × 10-folds |
@@ -48,7 +49,12 @@ F-measure média (300 avaliações, IC 95% em `output/resultados.md`):
 
 ## Como rodar
 
-A partir da raiz do repositório, com `numpy`, `scipy`, `pandas`, `scikit-learn`, `matplotlib` e `joblib`:
+**No Colab:** abra
+[`questao2.ipynb` no Colab](https://colab.research.google.com/github/ergdln/IN1102-AM/blob/questao-02-pipeline/questao-02/questao2.ipynb)
+e execute todas as células. O notebook baixa o repositório e, por padrão, usa os resultados salvos em `output/`
+(segundos); com `RODAR_CV = True` e `RODAR_CURVAS = True` refaz tudo do zero.
+
+**Pelo terminal**, a partir da raiz do repositório, com `numpy`, `scipy`, `pandas`, `scikit-learn`, `matplotlib` e `joblib`:
 
 ```bash
 python questao-02/executar_cv.py          # (a)  ~10 min com 10 núcleos; retoma de onde parou
