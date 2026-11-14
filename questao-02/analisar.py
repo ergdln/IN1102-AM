@@ -102,25 +102,25 @@ def friedman_nemenyi(res):
 
 def grafico_cd(postos_medios, versao, arquivo):
     """Diagrama de diferença crítica: postos médios por métrica, com a CD."""
-    fig, eixos = plt.subplots(2, 2, figsize=(14, 7.5))
+    fig, eixos = plt.subplots(2, 2, figsize=(14, 8))
     for eixo, metrica in zip(eixos.flat, comum.METRICAS):
         medios, cd = postos_medios[metrica]
         ordem = medios.sort_values()
         eixo.hlines(0, 1, len(ORDEM), color="0.6", lw=1)
-        eixo.scatter(ordem.values, np.zeros(len(ordem)), color="tab:blue", s=50, zorder=3)
+        eixo.scatter(ordem.values, np.zeros(len(ordem)), color="tab:blue", s=70, zorder=3)
 
         # Rótulos alternam acima/abaixo da linha; se um rótulo do mesmo lado
-        # já está a menos de 0.7 postos, este sobe (ou desce) um nível.
+        # já está a menos de 0.95 postos, este sobe (ou desce) um nível.
         ocupados = {1: [], -1: []}
         for j, (clf, valor) in enumerate(ordem.items()):
             lado = -1 if j % 2 == 0 else 1
             nivel = 0
-            while any(n == nivel and abs(valor - x) < 0.7 for x, n in ocupados[lado]):
+            while any(n == nivel and abs(valor - x) < 0.95 for x, n in ocupados[lado]):
                 nivel += 1
             ocupados[lado].append((valor, nivel))
             eixo.annotate(f"{NOMES_CURTOS[clf]}\n{valor:.2f}", (valor, 0),
-                          xytext=(0, lado * (10 + 36 * nivel)), textcoords="offset points",
-                          ha="center", va="bottom" if lado > 0 else "top", fontsize=12)
+                          xytext=(0, lado * (10 + 46 * nivel)), textcoords="offset points",
+                          ha="center", va="bottom" if lado > 0 else "top", fontsize=16)
 
         # Régua com o comprimento da CD, acima do painel: dois classificadores
         # mais distantes que ela têm postos médios significativamente diferentes.
@@ -128,13 +128,13 @@ def grafico_cd(postos_medios, versao, arquivo):
         eixo.plot([len(ORDEM) - cd, len(ORDEM)], [1.07, 1.07], color="tab:red", lw=4,
                   transform=regua, clip_on=False)
         eixo.text(len(ORDEM) - cd - 0.08, 1.07, f"CD = {cd:.2f}", transform=regua,
-                  ha="right", va="center", fontsize=12, color="tab:red")
+                  ha="right", va="center", fontsize=16, color="tab:red")
         eixo.set_xlim(0.6, len(ORDEM) + 0.4)
         eixo.set_ylim(-1, 1)
         eixo.set_yticks([])
-        eixo.tick_params(axis="x", labelsize=11)
-        eixo.set_title(f"{comum.NOMES_METRICAS[metrica]}", fontsize=14, loc="left")
-    fig.suptitle(f"Friedman / Nemenyi — versão {versao} (posto médio, 1 = melhor)", fontsize=15)
+        eixo.tick_params(axis="x", labelsize=15)
+        eixo.set_title(f"{comum.NOMES_METRICAS[metrica]}", fontsize=18, loc="left")
+    fig.suptitle(f"Friedman / Nemenyi — versão {versao} (posto médio, 1 = melhor)", fontsize=18)
     fig.tight_layout()
     fig.savefig(arquivo, dpi=150)
     plt.close(fig)
