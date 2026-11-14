@@ -17,7 +17,7 @@ F-measure média (300 avaliações, IC 95% em `output/resultados.md`):
 
 | | Gaussiano | k-vizinhos | Parzen | Logística | Voto |
 |---|---|---|---|---|---|
-| **v1** | 0,815 | 0,888 | 0,897 | 0,906 | **0,919** |
+| **v1** | 0,814 | 0,888 | 0,897 | 0,906 | **0,919** |
 | **v2** | 0,744 | 0,943 | 0,977 | 0,963 | **0,986** |
 
 - **v1.** O voto majoritário é o melhor em taxa de erro (6,4%) e F-measure; o Friedman rejeita H0 nas 4 métricas e,
