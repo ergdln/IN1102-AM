@@ -5,9 +5,11 @@ QUESTÃO 2(d): CURVAS DE APRENDIZAGEM (F-MEASURE)
 Para cada versão da base e cada proporção de treinamento p = 5%, 10%, ...,
 95% (teste = 1 - p), com divisão estratificada:
   - treina os 5 classificadores no conjunto de treinamento;
-  - calcula a F-measure (classe positiva) no próprio treinamento e no teste.
-Cada proporção é repetida N_REPETICOES vezes com sorteios diferentes; o
-gráfico mostra a média e a faixa de +-1 desvio-padrão.
+  - calcula as 4 métricas (taxa de erro, precisão, cobertura e F-measure,
+    da classe positiva) no próprio treinamento e no teste.
+Cada proporção é repetida N_REPETICOES vezes com sorteios diferentes. O
+gráfico é o da F-measure, como pede o enunciado (média e faixa de +-1
+desvio-padrão); as 4 métricas ficam nos CSVs.
 
 HIPER-PARÂMETROS: fixos em cada proporção, iguais à configuração mais
 escolhida na validação cruzada 30 x 10 do item (a) (lida de
@@ -16,7 +18,10 @@ CV em cada tamanho não é possível nos menores: com 5% de treino a classe
 minoritária da versão 2 tem só 2 exemplos, e não há como formar 5 folds
 estratificados.
 
-Saídas em questao-02/output/: curva_<versao>.csv e curva_<versao>.png
+Saídas em questao-02/output/:
+  curva_<versao>.csv         as 4 métricas de cada sorteio, classificador e conjunto
+  curva_resumo_<versao>.csv  média dos sorteios por proporção
+  curva_<versao>.png         gráfico da F-measure
 
 Uso (a partir da raiz do repositório):
     python questao-02/curva_aprendizagem.py
@@ -59,13 +64,13 @@ def avaliar_proporcao(X, y, proporcao, repeticao, configs):
         for conjunto, idx in conjuntos.items():
             preds[conjunto].append(modelo.predict(X[idx]))
             probas[conjunto].append(modelo.predict_proba(X[idx]))
-            f1 = comum.calcular_metricas(y[idx], preds[conjunto][-1])["f_measure"]
-            linhas.append({"classificador": nome, "conjunto": conjunto, "f_measure": f1})
+            linhas.append({"classificador": nome, "conjunto": conjunto,
+                           **comum.calcular_metricas(y[idx], preds[conjunto][-1])})
 
     for conjunto, idx in conjuntos.items():
         voto = clf.voto_majoritario(preds[conjunto], probas[conjunto], modelo.classes_)
         linhas.append({"classificador": "voto", "conjunto": conjunto,
-                       "f_measure": comum.calcular_metricas(y[idx], voto)["f_measure"]})
+                       **comum.calcular_metricas(y[idx], voto)})
 
     for linha in linhas:
         linha.update(proporcao_treino=proporcao, repeticao=repeticao + 1,
@@ -119,6 +124,9 @@ def main():
                                      for p, r in tarefas)
         curva = pd.DataFrame([linha for linhas in saidas for linha in linhas])
         curva.to_csv(PASTA / f"curva_{versao}.csv", index=False)
+        (curva.groupby(["classificador", "conjunto", "proporcao_treino"], sort=False)
+         [list(comum.METRICAS)].mean().round(4)
+         .to_csv(PASTA / f"curva_resumo_{versao}.csv"))
         grafico(curva, versao, PASTA / f"curva_{versao}.png")
 
         resumo = curva.pivot_table(index="proporcao_treino", columns=["classificador", "conjunto"],

@@ -42,7 +42,7 @@ F-measure média (300 avaliações, IC 95% em `output/resultados.md`):
 | `classificadores.py` | Os 5 classificadores e a seleção de hiper-parâmetros |
 | `executar_cv.py` | Item (a): validação cruzada aninhada 30 × 10-folds |
 | `analisar.py` | Itens (b) e (c): IC 95%, Friedman e Nemenyi |
-| `curva_aprendizagem.py` | Item (d): curvas de aprendizagem da F-measure |
+| `curva_aprendizagem.py` | Item (d): curvas de aprendizagem (4 métricas; gráfico da F-measure) |
 | `reconstroi_cl_star.py` | Gera `cl_star.csv` sem R (double k-means em Python, conferido com as saídas da Questão 1) |
 | `splits/folds_<versao>.csv` | Os 30 × 10 folds sorteados (fold de teste de cada e-mail em cada repetição) |
 | `output/` | Resultados (ver abaixo) |
@@ -87,7 +87,8 @@ A padronização (z-score) é ajustada dentro de cada treino, nunca com dados de
 H0 "postos médios iguais"; se rejeitada, Nemenyi com CD = q₀,₀₅ · √(k(k+1)/6N), q₀,₀₅ = 2,728 (k = 5).
 
 **Curvas (item d).** Treino de 5% a 95% (passo 5%), divisão estratificada, 5 sorteios por proporção;
-F-measure no treino e no teste; hiper-parâmetros fixos na configuração mais escolhida no item (a).
+as 4 métricas no treino e no teste (o gráfico é o da F-measure); hiper-parâmetros fixos na configuração mais
+escolhida no item (a).
 
 ## Classificadores e hiper-parâmetros
 
@@ -123,5 +124,7 @@ F-measure no treino e no teste; hiper-parâmetros fixos na configuração mais e
 | `friedman_<versao>.csv`, `nemenyi_<versao>.csv` | Testes estatísticos |
 | `cd_<versao>.png` | Diagrama de diferença crítica |
 | `hiperparametros_<versao>.csv` | Frequência de cada configuração escolhida |
-| `curva_<versao>.csv`, `curva_<versao>.png` | Curvas de aprendizagem |
+| `curva_<versao>.csv` | Curvas: as 4 métricas no treino e no teste, por sorteio |
+| `curva_resumo_<versao>.csv` | Curvas: média dos 5 sorteios por proporção |
+| `curva_<versao>.png` | Gráfico da curva de aprendizagem da F-measure |
 | `resultados.md` | Todas as tabelas acima, em um arquivo |
