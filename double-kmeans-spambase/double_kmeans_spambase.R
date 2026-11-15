@@ -476,6 +476,10 @@ if (tem_drclust) {
 }
 writeLines(sprintf("K*=%d H*=%d ARI=%.6f", Kstar, Hstar, ari), file.path(out_dir, "ari.txt"))
 
+## Rótulos da partição de objetos com K* (um por e-mail, na ordem do arquivo
+## spambase.data). São a variável resposta da VERSÃO 2 da base na Questão 2.
+write.csv(data.frame(cluster = cl_star), file.path(out_dir, "cl_star.csv"), row.names = FALSE)
+
 ## COMO INTERPRETAR (comentário pedido no enunciado)
 ## -------------------------------------------------
 ## O ARI mede o quanto a partição encontrada COINCIDE com a divisão
@@ -555,5 +559,5 @@ cat("\n== iv) Função objetivo por iteração (melhor execução) ==\n")
 print(iter_df, row.names = FALSE)
 
 cat("\nArquivos gerados em", normalizePath(out_dir), ":\n")
-print(list.files(out_dir, pattern = "\\.(png|csv|txt)$"))
+print(list.files(out_dir, pattern = "\\.(png|csv|txt)$"))   # inclui cl_star.csv (usado na Questão 2)
 cat("\nFIM.\n")

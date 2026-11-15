@@ -1,0 +1,21 @@
+classificador,configuracao,vezes
+gaussiano,reg=1e-05,117
+gaussiano,reg=0.0001,101
+gaussiano,reg=1e-06,82
+knn,"metrica=cityblock, k=1",120
+knn,"metrica=cityblock, k=5",106
+knn,"metrica=euclidean, k=1",32
+knn,"metrica=cityblock, k=7",29
+knn,"metrica=cityblock, k=3",6
+knn,"metrica=euclidean, k=3",6
+knn,"metrica=euclidean, k=5",1
+parzen,h=0.5,173
+parzen,h=0.6,123
+parzen,h=0.7,4
+logistica,C=30.0,107
+logistica,C=100.0,63
+logistica,C=10.0,61
+logistica,C=1000.0,41
+logistica,C=3.0,21
+logistica,C=1.0,6
+logistica,C=0.3,1

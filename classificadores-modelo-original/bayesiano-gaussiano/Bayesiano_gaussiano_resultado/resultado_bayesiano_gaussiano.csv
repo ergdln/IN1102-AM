@@ -1,0 +1,5 @@
+﻿Classificador,Metrica,Estimativa_pontual,IC95_inferior,IC95_superior
+Bayesiano Gaussiano,Taxa de erro,0.2184,0.2028,0.2339
+Bayesiano Gaussiano,Precisao,0.6781,0.6665,0.6896
+Bayesiano Gaussiano,Cobertura,0.956,0.9535,0.9585
+Bayesiano Gaussiano,F-measure,0.7873,0.7783,0.7963
