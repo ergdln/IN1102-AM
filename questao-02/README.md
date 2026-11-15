@@ -50,7 +50,7 @@ F-measure média (300 avaliações, IC 95% em `output/resultados.md`):
 ## Como rodar
 
 **No Colab:** abra
-[`questao2.ipynb` no Colab](https://colab.research.google.com/github/ergdln/IN1102-AM/blob/questao-02-pipeline/questao-02/questao2.ipynb)
+[`questao2.ipynb` no Colab](https://colab.research.google.com/github/ergdln/IN1102-AM/blob/main/questao-02/questao2.ipynb)
 e execute todas as células. O notebook baixa o repositório e, por padrão, usa os resultados salvos em `output/`
 (segundos); com `RODAR_CV = True` e `RODAR_CURVAS = True` refaz tudo do zero.
 
